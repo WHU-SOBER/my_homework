@@ -8,24 +8,25 @@ fi
 
 mkdir build
 
-gcc src/util.c src/dfs.c -std=c99 -o build/dfs.out
+gcc src/util.c src/astar.c -std=c99 -o build/astar.out
 
-if [ ! -f build/dfs.out ]; then
+if [ ! -f build/astar.out ]; then
     echo 'compile failed'
     exit
 fi
 
 cd base
-python2 pacman.py -l tinyMaze -p SearchAgent
+python pacman.py -l mediumMaze -p SearchAgent -a fn=astar
 if [ ! $? -eq 0 ]; then
   exit 1
 fi
-python2 pacman.py -l mediumMaze -p SearchAgent
+python pacman.py -l mediumDottedMaze -p StayEastSearchAgent3
 if [ ! $? -eq 0 ]; then
   exit 1
 fi
-python2 pacman.py -l bigMaze -z .5 -p SearchAgent
+python pacman.py -l mediumScaryMaze -p StayWestSearchAgent3
 if [ ! $? -eq 0 ]; then
   exit 1
 fi
+
 echo 'all tests passed'

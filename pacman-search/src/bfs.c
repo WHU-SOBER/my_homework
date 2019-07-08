@@ -1,5 +1,6 @@
 #include "util.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #define MAXSIZE 1000
 typedef struct point {
@@ -28,11 +29,11 @@ int is_fullQueue(queue *q)
 }
 
 //入队函数，接收int类型的数据入队尾。正常返回值为0，如果队满则返回-1
-int enqueue(point p, QUEUE *q)
+int enqueue(point p, queue *q)
 {
 	if (is_fullQueue(q))
 		return -1;
-	q->data[q->rear] = p;
+	*(q->data[q->rear]) = p;
 	q->rear = (q->rear + 1) % MAXSIZE;
 	return 0;
 }
@@ -42,7 +43,7 @@ point dequeue(queue *q)
 {
 	/*if (is_emptyQueue(q))
 		return -1;*/
-	point result = q->data[q->front];
+	point result = *(q->data[q->front]);
 	q->front = (q->front + 1) % MAXSIZE;
 	return result;
 }
@@ -57,6 +58,13 @@ int main() {
 	init(&state);
 	// write your code here
 	//队列初始化
+	for(int i = 0; i < MAXSIZE; i++)
+	{
+		for(int j = 0; j < MAXSIZE; j++)
+		{
+			flag[i][j] = -1;
+		}
+	}
 	queue *q = (queue*)malloc(sizeof(queue));
 	for (int i = 0; i < MAXSIZE; i++)
 	{
@@ -64,19 +72,17 @@ int main() {
 	}
 	q->front = 0;
 	q->rear = 0;
-	int find = 0;
 	point p = { state.start_x, state.start_y };
 	enqueue(p, q);
-	while (!is_emptyQueue && !find)
+	while (!is_emptyQueue)
 	{
 		p = dequeue(q);
-		if (p == {state.end_x, state.end_y})
+		if (p.l == state.goal_x && p.r == state.goal_y)
 		{
-			find = 1;
 			int i = -1;
 			int x = state.start_x;
 			int y = state.start_y;
-			while (!(x == goal_x && y == goal_y))
+			while (!(x == state.goal_x && y == state.goal_y))
 			{
 				i++;
 				switch (flag[x][y])
@@ -94,11 +100,11 @@ int main() {
 			return 0;
 		}
 		int dir = -1;
-		while (dir < 4)
+		while (dir < 3)
 		{
 			dir++;
-			int l = p->l;
-			int r = p->r;
+			int l = p.l;
+			int r = p.r;
 			switch (dir) {
 			case 0:l--; break;
 			case 1:r++; break;
@@ -107,8 +113,9 @@ int main() {
 			}
 			if (flag[l][r] == -1)
 			{
-				flag[p->l][p->r] = dir;
-				enqueue({ l, r }, q);
+				flag[p.l][p.r] = dir;
+				point temp = {l, r};
+				enqueue(temp, q);
 			}
 		}
 	}
