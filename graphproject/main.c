@@ -1,78 +1,112 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include "stats.h"
-#include "search.h"
-#include "mytools.h"
-
-int main(int argc, char** argv)
+#include <stdlib.h>
+#include"util.h"
+#include"mytools.h"
+#include"stats.h"
+#include"search.h"
+//将迷宫转化为有向图邻接表
+int dx[] = { -1,0,1,0 };
+int dy[] = { 0,1,0,-1 };
+void  creatGraph1(game_state_t *state, NODE *list[])
 {
-
-	if (argc == 2)
-	{
-		if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0)
-		{
-			printf("Helping tips are following:\n");
-			printf("There are only 3 order forms you can use:\n\n");
-			printf("0.\"./search-cli -j\" to see how SuanTouJun looks like.\n\n");
-			printf("1.\"./search-cli -h/--help\" to get help.\n");
-			printf("Considering you are watching these words...just ignore this tip.hhh\n\n");
-			printf("2.\".search-cli -g/--graph FILE_PATH -s/--stats STATS_PARAMS -u node's name\"to display the stats information of graph contained in the file named \"FILE_PATH\".\n");
-			printf("You can choose the following params as \"STATS_PARAMS\"\n");
-			printf("edges\n");
-			printf("vertices\n");
-			printf("freeman\n");
-			printf("betweenness\n");
-			printf("closeness\n");
-			printf("eigenvector\n\n");
-			printf("3.\"./search-cli -g/--graph FILE_PATH -sp/--shortestpath SEARCH_PARAMS -u STARTING_POINT -v TARGET_POINT\" to display the shortest path from point u to point v using SEARCH_PARAMS.\n");
-			printf("You can choose the following params as \"SEARCH_PARAMS\"\n");
-			printf("DFS\n");
-			printf("BFS\n");
-			printf("Dijkstra\n");
-			printf("SPFA\n");
-			printf("A*\n");
-		}
-		else if (strcmp(argv[1], "-j") == 0)
-			drawPicture();
-	}
-	else if (argc == 5 || argc == 7)
-	{
-		if ((strcmp(argv[1], "-g") == 0 || strcmp(argv[1], "--graph")) && (strcmp(argv[3], "-s") == 0 || strcmp(argv[3], "--states")))
-		{
-			if (strcmp(argv[4], "edges") == 0)
-				printf("The number of edges is %d\n", numberOfEdges(argv[2]));
-			else if (strcmp(argv[4], "vertices") == 0)
-				printf("The number of vertices is %d\n", numberOfVertices(argv[2]));
-			else if (strcmp(argv[4], "freeman") == 0)
-				printf("The freeman's network centrality value is %lf\n", freemanNetworkCentrality(argv[2]));
-			else if (strcmp(argv[4], "betweenness") == 0)
-				{
-				if(strcmp(argv[5], "-u") == 0)
-					printf("The betweenness centrality value is %lf\n", betweennessCentrality(argv[2], argv[6]));
+	NODE *p, *new1;
+	int x, y;
+	for (int i = 1; i < state->n - 1; i++) {
+		for (int j = 1; j < state->m - 1; j++) {
+			if (state->grid[i][j] == 0)
+			{
+				for (int k = 0; k < 4; k++) {
+					x = i + dx[k];
+					y = j + dy[k];
+					if (state->grid[x][y] == 0) {
+						p = list[i*state->m + j];
+						new1 = (NODE*)malloc(sizeof(NODE));
+						new1->num = x * state->m + y;	//该点的编号
+						new1->weight = state->cost[x][y];
+						new1->next = p->next;
+						p->next = new1;
+					}
 				}
-			else if (strcmp(argv[4], "closeness") == 0)
-				{
-				if (strcmp(argv[5], "-u") == 0)
-					printf("The closeness centrality value is %lf\n", closenessCentrality(argv[2], argv[6]));
-				}
-			else if (strcmp(argv[4], "eigenvector") == 0)
-				{
-				if (strcmp(argv[5], "-u") == 0)
-					printf("The eigenvector centrality value is %lf\n", eigenvectorCentrality(argv[2], argv[6]));
-				}
+			}
 		}
 	}
-	else if (argc == 9)
+}
+//将有向图路径path转化为坐标路径并返回（需要使用point*变量接收）
+char* transPath(int path[], game_state_t s)
+{
+	int num = 0;
+	for (int i = 0; i < MAXSIZE; i++)
 	{
-		if ((strcmp(argv[1], "-g") == 0 || strcmp(argv[1], "--graph")) && (strcmp(argv[3], "-sp") == 0 || strcmp(argv[3], "--shortestpath")))
+		if (path[i] < 0)
 		{
-			showPath(shortestPath(transNumber(argv[6]), transNumber(argv[8]), argv[4], argv[2]));
+			num = i;
+			break;
 		}
 	}
-	else
-		printf("emm...Are you sure that you just input the rihgt order?\nIf you don\'t know what to do, try use\"./search-cli -h/--help\"\n");
-	return 0;
+	int point[MAXSIZE][2];
+	for (int i = 0; i < num; i++)
+	{
+		point[i][0] = path[i] / s.m;
+		point[i][1] = path[i] % s.n;
+	}
+	char *re = (char*)malloc(sizeof(char));
+	int i = 0;
+	while (i != num)
+	{
+		if (point[i + 1][0] == point[i][0])
+		{
+			if (point[i + 1][1] - point[i][1] == 1)
+				re[i] = 'E';
+			else
+				re[i] = 'W';
+		}
+		else
+		{
+			if (point[i + 1][0] - point[i][0] == 1)
+				re[i] = 'S';
+			else
+				re[i] = 'N';
+		}
+	}
+	return re;
 }
 
+void fileName(NODE *list[])
+{
+	FILE *fp = fopen("tempf.txt", "a");
+	for (int i = 0; list[i]->num >= 0; i++)
+	{
+		NODE *temp = list[i]->next;
+		while (temp != NULL)
+		{
+			fprintf(fp, "%d %d %lf\n", list[i]->num, temp->num, temp->weight);
+		}
+	}
+	fclose(fp);
+}
 
+int main() {
+	game_state_t state;
+	init(&state);
+	/*创建并初始化邻接表*/
+	NODE *list[MAXSIZE];
+	for (int i = 0; i < state.m * state.n; i++) {
+		list[i] = (NODE*)malloc(sizeof(NODE));
+		list[i]->num = i;
+		list[i]->weight = state.cost[i / state.m][i % state.n];
+		list[i]->next = NULL;
+	}
+	creatGraph1(&state, list);
+	int path[MAXSIZE];
+	for (int i = 0; i < MAXSIZE; i++)
+	{
+		path[i] = -1;
+	}
+	fileName(list);
+	char name[15] = "tempf.txt";
+	A(state.start_x, state.start_y, name, path);
+	char *answer;
+	answer = transPath(path, state);
+	return 0;
+}

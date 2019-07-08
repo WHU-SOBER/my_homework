@@ -4,7 +4,91 @@
 #define MAXSIZE 1000
 char result[MAXSIZE];
 int flag[MAXSIZE][MAXSIZE];
+//栈结构体定义
+typedef struct stack {
+	int data[MAXSIZE];
+	int top;
+}STACK;
 
+//求栈中点连线的权重和
+int sumStack(STACK *s, NODE *list[])
+{
+	int sum = 0;
+	for (int i = 0; i < s->top; i++)
+	{
+		sum += getWeight(s->data[i], s->data[i + 1], list);
+	}
+	return sum;
+}
+
+//将栈中所有点写入path数组
+void wtritePath(STACK *s, int path[])
+{
+	int i;
+	for (i = 0; i <= s->top; i++)
+	{
+		path[i] = s->data[i];
+	}
+	path[i] = -1;
+}
+
+//属于DFS的私有全局变量
+int private_minWeight = 0x3f3f3f3f;
+int private_flag[MAXSIZE];
+void funcDFS(int u, int v, NODE* list[], int path[], STACK *s)
+{
+	push(u, s);
+	private_flag[u] = 1;
+	if (u == v)
+	{
+		if (private_minWeight > sumStack(s, list))
+		{
+			wtritePath(s, path);
+			private_minWeight = sumStack(s, list);
+		}
+	}
+	else
+	{
+		NODE *temp = list[u]->next;
+		while (temp != NULL)
+		{
+			if (private_flag[temp->num] == 0)
+			{
+				funcDFS(temp->num, v, list, path, s);
+			}
+			temp = temp->next;
+		}
+	}
+	pop(s);
+	private_flag[u] = 0;
+}
+/*
+int DFS(int u, int v, char name[], int path[])
+{
+	if (u == v)
+	{
+		path[0] = -1;
+		return;
+	}
+	//初始化邻接表
+	NODE *list[MAXSIZE];
+	initList(list);
+	//把图存入邻接表
+	int n = creatGraph(name, list);
+	//初始化栈，用于暂存路径
+	STACK *s = NULL;
+	initStack(&s);
+	//标志数组flag用于记录该点有无被探索过
+	for (int i = 0; i < MAXSIZE; i++)
+	{
+		private_flag[i] = 0;
+	}
+	int min = 0x3f3f3f3f;
+	funcDFS(u, v, list, path, s);
+	//printf("cost: %d\n", private_minWeight);
+	return private_minWeight;
+}
+*/
 void DFS(int start_x, int start_y, int goal_x, int goal_y, game_state_t state)
 {
 	if (start_x == goal_x && start_y == goal_y)
@@ -63,7 +147,6 @@ int main() {
 			flag[i][j] = -1;
 		}
 	}
-	//初始化栈
 	DFS(state.start_x, state.start_y, state.goal_x, state.goal_y, state);
 	// 
 	destroy(&state);
