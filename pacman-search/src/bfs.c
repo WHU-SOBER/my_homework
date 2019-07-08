@@ -38,10 +38,10 @@ int enqueue(point p, QUEUE *q)
 }
 
 //出队函数， 将队头元素出队并返回.正常返回值为0，如果队空则返回-1
-point dequeue(QUEUE *q)
+point dequeue(queue *q)
 {
-	if (is_emptyQueue(q))
-		return -1;
+	/*if (is_emptyQueue(q))
+		return -1;*/
 	point result = q->data[q->front];
 	q->front = (q->front + 1) % MAXSIZE;
 	return result;
