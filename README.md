@@ -1,5 +1,2 @@
 # my_homework
-just, 
-store my homework, 
-store temp files, 
-nothing more
+just store my homework ... nothing more
