@@ -1,2 +1,2 @@
 # my_homework
-just to store my homework,,,, nothing more
+just store my homework ... nothing more
