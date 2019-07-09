@@ -109,7 +109,7 @@ void DFS(int start_x, int start_y, int goal_x, int goal_y, game_state_t state)
 		}
 		i++;
 		result[i] = '\0';
-		printf("%s\n", result);
+		printf("%s", result);
 	}
 	else
 	{
