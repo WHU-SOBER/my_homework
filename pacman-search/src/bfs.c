@@ -58,6 +58,14 @@ int main() {
 	init(&state);
 	// write your code here
 	//队列初始化
+	point path[MAXSIZE][MAXSIZE];
+	for(int i = 0; i < MAXSIZE; i++)
+	{
+		for(int j = 0; j < MAXSIZE; j++)
+		{
+			path[i][j] = {-1, -1};
+		}
+	}
 	for(int i = 0; i < MAXSIZE; i++)
 	{
 		for(int j = 0; j < MAXSIZE; j++)
@@ -74,17 +82,19 @@ int main() {
 	q->rear = 0;
 	point p = { state.start_x, state.start_y };
 	enqueue(p, q);
-	while (!is_emptyQueue)
+	while (!is_emptyQueue(q))
 	{
+		//printf("part 1 work");
+		//return 0;
 		p = dequeue(q);
 		if (p.l == state.goal_x && p.r == state.goal_y)
 		{
+			return 0;
 			int i = -1;
 			int x = state.start_x;
 			int y = state.start_y;
 			while (!(x == state.goal_x && y == state.goal_y))
 			{
-				i++;
 				switch (flag[x][y])
 				{
 				case 0:result[i] = 'N'; x--; break;
@@ -95,13 +105,14 @@ int main() {
 			}
 			i++;
 			result[i] = '\0';
-			printf("%s\n", result);
-			destroy(&state);
+			printf("%s", result);
+			destroy(&s`tate);
 			return 0;
 		}
 		int dir = -1;
 		while (dir < 3)
 		{
+			//printf("part 1 work");
 			dir++;
 			int l = p.l;
 			int r = p.r;
@@ -111,13 +122,19 @@ int main() {
 			case 2:l++; break;
 			case 3:r--; break;
 			}
-			if (flag[l][r] == -1)
+			if (state.grid[l][r] == 0 && flag[l][r] == -1)
 			{
+				path[l][r] = p;
 				flag[p.l][p.r] = dir;
 				point temp = {l, r};
 				enqueue(temp, q);
 			}
 		}
+		/*for(int i = q->front; i < q->rear; i++)
+		{
+			printf("%d , %d\n", q->data[i]->l, q->data[i]->r);
+		}
+		printf("\n");*/
 	}
 	// 
 	return 0;
