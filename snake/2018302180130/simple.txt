@@ -1,0 +1,9 @@
+8 8 0.1 0.1 8
+XXXXXXXX
+X--S---X
+X------X
+X------X
+X------X
+X------X
+X------X
+XXXXXXXX
